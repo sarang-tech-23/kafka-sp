@@ -5,6 +5,8 @@ import json
 from .recv_bytes import recv_bytes_of_length
 from .msg_processor import msg_processor
 import struct
+import threading
+from queue import Queue
 
 class Broker():
     def __init__(self, host='0.0.0.0', port=8001):
@@ -24,37 +26,9 @@ class Broker():
             # so each client connection is distiguished based on these parameters
             conn, addr = s.accept()
             print(f'conn_handshake_succes: {conn}')
-            threading.Thread(target=msg_processor, args=(conn, addr)).start()
+            msg_processor(conn, addr)
 
-    def handle_conn(self, conn, addr):
-        print(f"Connected: {addr}")
-        # receive all the bytes in tcp stream
-
-        len_bytes = recv_bytes_of_length(conn, 4)
-        (total_len,) = struct.unpack("!I", len_bytes)
-
-        raw_msg = recv_bytes_of_length(conn, total_len)
-        msg_processor(raw_msg)
-
-        while data := conn.recv(1024):
-            msg = json.loads(data.decode())
-            if msg["type"] == "produce":
-                '''
-                - check the topic and partition it is for.
-                - store it in os page cache (later flushed to disk) 
-                - give and offset no to the message
-                - send True conn object
-                '''
-                print(f"Received message: {msg['data']}")
-                conn.send(b'{"status": "ok"}')
-            elif msg["type"] == "consume":
-                '''
-                - check the topic and partition
-                - check the offset no
-                - send data packet back to conn object
-                '''
-                conn.send(b'{"messages": ["hello", "world"]}')
-        conn.close()
-
-    # creates a socket connection object, AF_INET -> IPv4, SOCK_STREAM -> TCP connection
-    
+    def start_broker_thread(self):
+        t = threading.Thread(target=self.start_broker).start()
+        t.join()
+        
