@@ -3,8 +3,6 @@
 ## Project Overview
 This project is a **poc demonstration** attempting to replicate the fundamental internal messaging functionality of Kafka using Python's inbuilt `socket` and `threading` libraries.
 
-The goal is to showcase the core architectural pattern involving a **Broker** (server), a **Producer** (writer), and a **Consumer** (reader).
-
 ---
 
 ## Getting Started
@@ -18,10 +16,7 @@ Follow below steps to run on your local machine.
     python3 --version
     ```
 
-### 1. Start the Broker
-
-The broker acts as the central message hub and must be running first.
-
+* Start the broker, producer and consumer service in defnied order
 ```bash
 # Terminal 1
 python3 start_broker.py
