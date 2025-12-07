@@ -3,10 +3,11 @@ import os, json, bisect, struct
 LOG_DIR = "./temp/log_dir/"
 FILE_OFFSET_SIZE = 1000
 
-def handler_msg_from_sub(msg):
+def handler_msg_from_sub(msg, conn):
     topic = msg.get("topic")
     partition = str(msg.get("partition"))
     msg_offset = int(msg.get("offset"))
+    # print(f'>> fetching_data_for_{topic}_{partition}_{msg_offset}')
 
     topic_path = os.path.join(LOG_DIR, topic)
     partition_path = os.path.join(topic_path, partition)
@@ -26,7 +27,7 @@ def handler_msg_from_sub(msg):
     if idx < 0:
         idx = 0
 
-    target_file = f"{file_offsets[idx]:08d}.log"
+    target_file = log_files[0] # single file for each partion
     target_path = os.path.join(partition_path, target_file)
 
     # read the first 4 bytes from the msg_offset in this file and then 
@@ -38,9 +39,12 @@ def handler_msg_from_sub(msg):
             raise EOFError("Reached end of file, no message at this offset")
 
         data_len = struct.unpack("!I", data_len_bytes)[0]
-        print(f'consumer_data_len: {data_len}')
+        # print(f'consumer_data_len: {data_len}')
         data_bytes = f.read(data_len)
-        msg_block = struct.pack(f"!{data_len}s", data_bytes)
-        print(f'consumer_msg_block: {msg_block}')
 
-    return target_path
+        next_offset = f.tell()
+        print(f'>>cons_sending_{next_offset}_{data_bytes}')
+        header = struct.pack("!QI", next_offset, len(data_bytes))
+        conn.sendall(header + data_bytes)
+        conn.close()
+

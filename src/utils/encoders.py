@@ -33,7 +33,7 @@ def encode_message_producer_to_broker(msg_type: int, topic: str, partition: int,
     total_len = len(body) + 4 + 4 +1  # 4 bytes total_len + 4 bytes crc + 1 byte msg_type
 
     # final message
-    print(f'pack_len: {len(struct.pack("!I B I", total_len, msg_type, crc))}. body_len: {len(body)}')
+    # print(f'pack_len: {len(struct.pack("!I B I", total_len, msg_type, crc))}. body_len: {len(body)}')
     # for pub/sub connection the data packets first 9 bytes should be reserved for this 3
     # attributes, total_len(the lenght of whole packet), msg_type(1/2), crc
     return struct.pack("!I B I", total_len, msg_type, crc) + body

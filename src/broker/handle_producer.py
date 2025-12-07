@@ -11,7 +11,9 @@ partions_state = {} # keys: (topic, partition), values: { q, t_instance }
 
 def log_writer_fn(topic, partition, partition_q):
     while True:
-        msg = partition_q.get() 
+        q_msg = partition_q.get() 
+        conn = q_msg.get('conn')
+        msg = q_msg.get('msg')
         topic_path = os.path.join(LOG_DIR, topic)
         partition_path = os.path.join(topic_path, partition)
 
@@ -27,10 +29,14 @@ def log_writer_fn(topic, partition, partition_q):
 
         current_file = os.path.join(partition_path, "00000000.log")
 
+        eof_offset = None
         with open(current_file, "ab") as f:
             f.write(msg_block)
+            eof_offset = f.tell()
 
-        return True
+        print(f'>>producer_eof_offset: {eof_offset}')
+        conn.sendall(str(eof_offset).encode())
+        conn.close()
 
 
 def get_partition_q(topic, partion):
@@ -39,27 +45,17 @@ def get_partition_q(topic, partion):
         return partions_state[key]
     
     q = Queue()
-    t = threading.Thread(target=log_writer_fn, args=(topic, partion, q), daemon=True).start()
+    t = threading.Thread(target=log_writer_fn, args=(topic, partion, q), daemon=True)
+    t.start()
 
     partions_state[key] = {"queue": q, "thread": t}
     return partions_state[key]
 
 
-def handler_msg_from_pub(msg):
+def handler_msg_from_pub(msg, conn):
     topic = msg.get("topic")
     partition = str(msg.get("partition"))
-    # we need to push data to a particular partition queue (internal)
-    # and there should be a thread running for each partition
-    # 
-    
 
     partion_q = get_partition_q(topic, partition)
-    partion_q.push(msg)
-
-    # check whether the queue/thread exists for (partition, topic)
-    # if not
-    # create queue then thread, msg, will be pushed to queue 
-    # thread process will read from that queue, and write the message to log
-
-
+    partion_q['queue'].put({'msg':msg, 'conn': conn})
   

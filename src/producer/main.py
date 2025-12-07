@@ -6,11 +6,11 @@ import socket
 from ..utils.encoders import encode_message_producer_to_broker
 
 def send_data(
+        data: str,
         host="0.0.0.0", 
         port=8001, 
-        topic='default', 
-        partition=1, 
-        data: str = 'Welcome to kafka-sp'
+        topic='default_topic', 
+        partition=1
     ):
     """
     host: broker host
@@ -22,5 +22,7 @@ def send_data(
 
     msg_bytes = encode_message_producer_to_broker(msg_type=1, topic=topic, partition=partition, data=data.encode('utf-8'))
     sock.send(msg_bytes)
-    print(f'message_sent: {msg_bytes}')
-    print(sock.recv(1024).decode())
+    ack_msg = sock.recv(1024).decode()
+    sock.close()
+    return ack_msg
+

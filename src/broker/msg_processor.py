@@ -16,12 +16,13 @@ def msg_processor(conn, addr):
     if msg_type == 1: # producer message
         msg = decode_producer_body(crc, body_bytes)
         print(f'recd_producer_msg: {msg}')
-        handler_msg_from_pub(msg)
+        handler_msg_from_pub(msg, conn)
+
     else: # consumer message
         msg = decode_consumer_body(crc, body_bytes)
         print(f'recd_consumer_msg: {msg}')
-        handler_msg_from_sub(msg)
+        handler_msg_from_sub(msg, conn)
 
-    conn.close()
+
 
 

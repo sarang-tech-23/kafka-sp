@@ -10,5 +10,5 @@ def recv_bytes_of_length(conn, length):
             raise ConnectionError("Socket closed before receiving full data")
         chunks.append(chunk)
         bytes_recd += len(chunk)
-        print(f'length: {length}  bytes_recvd: {bytes_recd}')
+        # print(f'length: {length}  bytes_recvd: {bytes_recd}')
     return b''.join(chunks)
