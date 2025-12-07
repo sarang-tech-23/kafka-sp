@@ -16,14 +16,14 @@ Follow below steps to run on your local machine.
     python3 --version
     ```
 
-* Start the broker, producer and consumer service in defnied order
-```bash
-# Terminal 1
-python3 start_broker.py
+* Start the broker, producer and consumer service in defnied order.
+    ```bash
+    # Terminal 1
+    python3 start_broker.py
 
-# Terminal 2
-python3 start_producer.py
+    # Terminal 2
+    python3 start_producer.py
 
-# Terminal 3
-python3 start_consumer.py
-```
+    # Terminal 3
+    python3 start_consumer.py
+    ```
