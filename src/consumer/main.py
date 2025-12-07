@@ -50,16 +50,16 @@ def receive_data(
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((host, port))
         msg_bytes = encode_consumer_to_broker_message(msg_type=2, topic=topic, partition=partition, offset=next_offset)
-        print(f'>>message_sent_2nd: {next_offset}__{type(next_offset)}')
+        # print(f'>>message_sent_2nd: {next_offset}__{type(next_offset)}')
         sock.send(msg_bytes)
 
         consumer_msg = sock.recv(1024)
-        print(f'>>len_consumer_msg: {len(consumer_msg)}')
+        # print(f'>>len_consumer_msg: {len(consumer_msg)}')
         # First 12 bytes = header
         header = consumer_msg[:12]
         next_offset, block_len = struct.unpack("!QI", header)
 
         # Remaining bytes = msg_block
-        msg_block = consumer_msg[12:12 + block_len]
-        print(f'>>cons_msg: {msg_block}')
+        msg_block = consumer_msg[12:12 + block_len].decode()
+        print(f'{msg_block}')
 
