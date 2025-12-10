@@ -25,11 +25,9 @@ class Broker():
             # conn is tuple, which contains (broker_host, broker_port, client_host, client_port)
             # so each client connection is distiguished based on these parameters
             conn, addr = s.accept()
+            t = threading.Thread(target=msg_processor, args=(conn, addr), daemon=True)
+            t.start()
             # print(f'conn_handshake_succes: {conn}')
-            msg_processor(conn, addr)
+            # msg_processor(conn, addr)
 
-    def start_broker_thread(self):
-        t = threading.Thread(target=self.start_broker)
-        t.start()
-        t.join()
         

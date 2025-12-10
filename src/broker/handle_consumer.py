@@ -46,5 +46,4 @@ def handler_msg_from_sub(msg, conn):
         print(f'>>cons_sending_{next_offset}_{data_bytes}')
         header = struct.pack("!QI", next_offset, len(data_bytes))
         conn.sendall(header + data_bytes)
-        conn.close()
 
