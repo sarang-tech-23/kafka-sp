@@ -19,10 +19,22 @@ def msg_processor(conn, addr):
         handler_msg_from_pub(msg, conn)
 
     else: # consumer message
+        # the first time we know that conn is from consumer
+        # we can add a while loop here to read again from the same consumer
+        # as this conn instance is scoped to this thread oly
         msg = decode_consumer_body(crc, body_bytes)
         print(f'recd_consumer_msg: {msg}')
         handler_msg_from_sub(msg, conn)
 
+        while True:
+            meta_data_bytes = recv_bytes_of_length(conn, 9)
+            total_len, msg_type, crc  = decode_packet_metadata(meta_data_bytes)
+            # print(f'meta_data_bytes_msg_process: {meta_data_bytes}.  total_len: {total_len}')
 
+            body_bytes = recv_bytes_of_length(conn, total_len-9)
+            print(f'recv_rest_msg: {body_bytes}')
 
+            msg = decode_consumer_body(crc, body_bytes)
+            print(f'recd_consumer_msg: {msg}')
+            handler_msg_from_sub(msg, conn)
 
